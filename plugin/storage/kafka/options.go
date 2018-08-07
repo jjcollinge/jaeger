@@ -25,10 +25,17 @@ import (
 )
 
 const (
-	configPrefix   = "kafka"
-	suffixBrokers  = ".brokers"
-	suffixTopic    = ".topic"
-	suffixEncoding = ".encoding"
+	configPrefix       = "kafka"
+	suffixBrokers      = ".brokers"
+	suffixTopic        = ".topic"
+	suffixEncoding     = ".encoding"
+	suffixSaslEnabled  = ".sasl.enabled"
+	suffixSaslUsername = ".sasl.username"
+	suffixSaslPassword = ".sasl.password"
+	suffixMetadata     = ".metadata"
+	suffixTLSEnabled   = ".tls.enabled"
+	//TODO Add required TLS config
+	suffixVersion = ".version"
 
 	encodingJSON  = "json"
 	encodingProto = "protobuf"
@@ -64,8 +71,45 @@ func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
 
 // InitFromViper initializes Options with properties from viper
 func (opt *Options) InitFromViper(v *viper.Viper) {
+	auths := make([]producer.Authenticator, 0)
+	saslEnabled := v.GetBool(configPrefix + suffixSaslEnabled)
+	if saslEnabled {
+		authConfig := producer.SASLAuthConfiguration{
+			Username: v.GetString(configPrefix + suffixSaslUsername),
+			Password: v.GetString(configPrefix + suffixSaslPassword),
+		}
+		auth, err := producer.NewSASLAuthenticator(authConfig)
+		if err != nil {
+			panic(fmt.Sprintf("cannot initialize new SASL authenticator: %+v", err))
+		}
+		auths = append(auths, auth)
+	}
+	tlsEnabled := v.GetBool(configPrefix + suffixTLSEnabled)
+	if tlsEnabled {
+		//TODO Build full TLS configuration
+		authConfig := producer.TLSAuthConfiguration{
+			Enabled: true,
+		}
+		auth, err := producer.NewTLSAuthenticator(authConfig)
+		if err != nil {
+			panic(fmt.Sprintf("cannot initialize new TLS authenticator: %+v", err))
+		}
+		auths = append(auths, auth)
+	}
+	fullMetadata := true
+	metadata := v.Get(configPrefix + suffixMetadata)
+	if metadata != nil {
+		if m, ok := metadata.(bool); !ok {
+			panic(fmt.Sprintf("config value %s%s must be a bool (true/false)", configPrefix, suffixMetadata))
+		} else {
+			fullMetadata = m
+		}
+	}
 	opt.config = producer.Configuration{
-		Brokers: strings.Split(v.GetString(configPrefix+suffixBrokers), ","),
+		Brokers:        strings.Split(v.GetString(configPrefix+suffixBrokers), ","),
+		Authenticators: auths,
+		Metadata:       fullMetadata,
+		Version:        v.GetString(configPrefix + suffixVersion),
 	}
 	opt.topic = v.GetString(configPrefix + suffixTopic)
 	opt.encoding = v.GetString(configPrefix + suffixEncoding)
