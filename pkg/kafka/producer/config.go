@@ -96,8 +96,6 @@ func (s *SASLAuthenticator) Authenticate(config *sarama.Config) (*sarama.Config,
 	config.Net.SASL.Enable = true
 	config.Net.SASL.User = s.config.Username
 	config.Net.SASL.Password = s.config.Password
-	config.Net.TLS.Enable = true
-	config.Version = sarama.V0_10_0_0
 	return config, nil
 }
 
