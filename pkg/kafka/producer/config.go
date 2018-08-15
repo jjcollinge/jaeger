@@ -59,26 +59,32 @@ func (c *Configuration) NewProducer() (sarama.AsyncProducer, error) {
 	return sarama.NewAsyncProducer(c.Brokers, saramaConfig)
 }
 
+// AuthConfiguration ...
 type AuthConfiguration interface{}
 
+// SASLAuthConfiguration ...
 type SASLAuthConfiguration struct {
 	Username string
 	Password string
 }
 
+// TLSAuthConfiguration ...
 type TLSAuthConfiguration struct {
 	Enabled bool
 	Config  *tls.Config
 }
 
+// Authenticator ...
 type Authenticator interface {
 	Authenticate(config *sarama.Config) (*sarama.Config, error)
 }
 
+// SASLAuthenticator ...
 type SASLAuthenticator struct {
 	config *SASLAuthConfiguration
 }
 
+// NewSASLAuthenticator ...
 func NewSASLAuthenticator(auth AuthConfiguration) (*SASLAuthenticator, error) {
 	c, ok := auth.(SASLAuthConfiguration)
 	if !ok {
@@ -89,6 +95,7 @@ func NewSASLAuthenticator(auth AuthConfiguration) (*SASLAuthenticator, error) {
 	}, nil
 }
 
+// Authenticate ...
 func (s *SASLAuthenticator) Authenticate(config *sarama.Config) (*sarama.Config, error) {
 	if s.config == nil || config == nil {
 		return nil, fmt.Errorf("error")
@@ -99,10 +106,12 @@ func (s *SASLAuthenticator) Authenticate(config *sarama.Config) (*sarama.Config,
 	return config, nil
 }
 
+// TLSAuthenticator ...
 type TLSAuthenticator struct {
 	config *TLSAuthConfiguration
 }
 
+// NewTLSAuthenticator ...
 func NewTLSAuthenticator(auth AuthConfiguration) (*TLSAuthenticator, error) {
 	c, ok := auth.(TLSAuthConfiguration)
 	if !ok {
@@ -113,6 +122,7 @@ func NewTLSAuthenticator(auth AuthConfiguration) (*TLSAuthenticator, error) {
 	}, nil
 }
 
+// Authenticate ...
 func (t *TLSAuthenticator) Authenticate(config *sarama.Config) (*sarama.Config, error) {
 	if t.config == nil || config == nil {
 		return nil, fmt.Errorf("error")

@@ -67,7 +67,7 @@ func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
 		defaultEncoding,
 		fmt.Sprintf(`Encoding of spans ("%s" or "%s") sent to kafka.`, encodingProto, encodingJSON),
 	)
-	flagSet.String(
+	flagSet.Bool(
 		configPrefix+suffixSaslEnabled,
 		false,
 		fmt.Sprintf("Enable SASL configuration"),
@@ -82,9 +82,9 @@ func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
 		"",
 		fmt.Sprintf("SASL password"),
 	)
-	flagSet.String(
+	flagSet.Bool(
 		configPrefix+suffixTLSEnabled,
-		"",
+		false,
 		fmt.Sprintf("Enable TLS configuration"),
 	)
 }
