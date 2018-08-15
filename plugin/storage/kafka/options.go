@@ -67,6 +67,26 @@ func (opt *Options) AddFlags(flagSet *flag.FlagSet) {
 		defaultEncoding,
 		fmt.Sprintf(`Encoding of spans ("%s" or "%s") sent to kafka.`, encodingProto, encodingJSON),
 	)
+	flagSet.String(
+		configPrefix+suffixSaslEnabled,
+		false,
+		fmt.Sprintf("Enable SASL configuration"),
+	)
+	flagSet.String(
+		configPrefix+suffixSaslUsername,
+		"",
+		fmt.Sprintf("SASL username"),
+	)
+	flagSet.String(
+		configPrefix+suffixSaslPassword,
+		"",
+		fmt.Sprintf("SASL password"),
+	)
+	flagSet.String(
+		configPrefix+suffixTLSEnabled,
+		"",
+		fmt.Sprintf("Enable TLS configuration"),
+	)
 }
 
 // InitFromViper initializes Options with properties from viper
