@@ -21,3 +21,4 @@ cmd/query/query
 cmd/query/query-linux
 crossdock/crossdock-linux
 run-crossdock.log
+.vscode/
